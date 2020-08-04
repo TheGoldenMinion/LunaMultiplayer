@@ -103,10 +103,11 @@ namespace Server
                 TaskContainer.Add(LongRunTaskFactory.StartNew(() => BackupSystem.PerformBackups(CancellationTokenSrc.Token), CancellationTokenSrc.Token));
                 TaskContainer.Add(LongRunTaskFactory.StartNew(LidgrenServer.StartReceivingMessages, CancellationTokenSrc.Token));
                 TaskContainer.Add(LongRunTaskFactory.StartNew(LidgrenMasterServer.RegisterWithMasterServer, CancellationTokenSrc.Token));
-
-                //TaskContainer.Add(LongRunTaskFactory.StartNew(VersionChecker.RefreshLatestVersion, CancellationTokenSrc.Token));
-                //TaskContainer.Add(LongRunTaskFactory.StartNew(VersionChecker.DisplayNewVersionMsg, CancellationTokenSrc.Token));
-                
+                Type t = Type.GetType ("Mono.Runtime"); //Check if running in Mono
+                if (t != null){
+                    TaskContainer.Add(LongRunTaskFactory.StartNew(VersionChecker.RefreshLatestVersion, CancellationTokenSrc.Token)); //Dont check for update because it doesn't work under Mono
+                    TaskContainer.Add(LongRunTaskFactory.StartNew(VersionChecker.DisplayNewVersionMsg, CancellationTokenSrc.Token)); //^
+                }
                 TaskContainer.Add(LongRunTaskFactory.StartNew(() => GcSystem.PerformGarbageCollection(CancellationTokenSrc.Token), CancellationTokenSrc.Token));
 
                 while (ServerContext.ServerStarting)
